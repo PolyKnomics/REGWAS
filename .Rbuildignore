@@ -1,0 +1,5 @@
+.gitlab-ci.yml
+.lintr
+.gitignore
+Container
+^LICENSE\.md$

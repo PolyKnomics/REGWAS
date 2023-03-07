@@ -1,0 +1,16 @@
+Package: REGWAS
+Title: Run Recurrent Event Genome-Wide Association Studies (REGWAS)
+Version: 1.0
+Authors@R: c(person("Tessel", "Galesloot", email = "Tessel.Galesloot@radboudumc.nl",
+                  role = c("aut","cre")),
+             person("Maarten", "Kooyman", email = "maarten@oyat.nl",
+                  role = c("aut"), comment = c(ORCID = "0000-0002-9023-5617"))
+                  )
+Description: Execute GWA on bgen files with recurrent event data.
+Depends: R (>= 3.5.0)
+Imports: RSQLite, survival (>= 3.2), rbgen, R6, DBI, coxme, doParallel, foreach, parallel
+License: MIT + file LICENSE
+LazyData: true
+RoxygenNote: 7.1.1
+Suggests:
+    testthat (>= 2.1.0),

@@ -1,0 +1,47 @@
+Bootstrap: docker
+From: clearlinux/r-base@sha256:8a59136e92d9b960927441fa4dea4d108a827e90aba54ab121e1dd174d1165db
+
+%help
+
+This containers has all the tools needed for the regwas program
+
+%setup
+
+
+%files
+    REGWAS.tar.gz
+
+%labels
+    Maintainer Maarten Kooyman
+    Version v1.0
+
+%environment
+    export MKL_NUM_THREADS="N"
+    export MKL_DYNAMIC="FALSE"
+    export OMP_NUM_THREADS=1
+
+%post
+    clrtrust generate
+    swupd bundle-add curl which python3-basic R-basic
+    #disable using default local lib in home dir and make seperate one for this container 
+    sed -i 's@~/R/x86_64-generic-linux-gnu-library@~/R/REGWAS@g' /usr/lib64/R/etc/Renviron
+    R --vanilla -e 'options(Ncpus = parallel::detectCores());install.packages("Rcpp", repos="https://cran.microsoft.com/snapshot/2020-11-30")'
+    R --vanilla -e 'options(Ncpus = parallel::detectCores());install.packages( "http://www.well.ox.ac.uk/~gav/resources/rbgen_v1.1.5.tgz", repos = NULL, type = "source" )'
+
+    R --vanilla -e 'options(Ncpus = parallel::detectCores());install.packages("survival", repos="https://cran.microsoft.com/snapshot/2020-11-30")'
+    R --vanilla -e 'options(Ncpus = parallel::detectCores());install.packages("RSQLite",  repos="https://cran.microsoft.com/snapshot/2020-11-30")'
+    R --vanilla -e 'options(Ncpus = parallel::detectCores());install.packages("coxme", repos="https://cran.microsoft.com/snapshot/2020-11-30")'
+    R --vanilla -e 'options(Ncpus = parallel::detectCores());install.packages("doParallel", repos="https://cran.microsoft.com/snapshot/2020-11-30")'
+
+    curl -L http://code.enkre.net/bgen/tarball/release/bgen.tgz -o bgen.tgz && gunzip bgen.tgz && tar -xf bgen.tar  && mv bgen.tgz bgen && cd bgen && ./waf configure && ./waf && ./waf install && cd .. && rm -rf bgen.tar.gz bgen
+    swupd bundle-remove python3-basic 
+    curl https://www.well.ox.ac.uk/~gav/resources/qctool_v2.0.6-Ubuntu16.04-x86_64.tgz -o qctool.tgz && tar -xf qctool.tgz && cp /qctool*/qctool /usr/bin/qctool && chmod o+x /usr/bin/qctool && rm -rf qctool*
+    swupd clean --all
+    R CMD INSTALL REGWAS.tar.gz
+    #create two files to prevent waning that password and group file do not exists
+    touch /etc/passwd
+    touch /etc/group
+
+%runscript
+    echo "Just starting R with arguments: $*"
+    exec R "$@"
